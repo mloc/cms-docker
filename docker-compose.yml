@@ -1,0 +1,39 @@
+version: '3'
+services:
+  cmsdb:
+    image: 'postgres:9.4'
+    environment:
+      POSTGRES_USER: cmsuser
+      POSTGRES_DB: cmsdb
+      POSTGRES_PASSWORD: cms
+    networks:
+      cms:
+
+  cmslog:
+    image: 'mloc6/cms'
+    entrypoint: cmsLogService
+    volumes:
+    - './cms.conf:/usr/local/etc/cms.conf:ro'
+    networks:
+      cms:
+
+  cms:
+    image: 'mloc6/cms'
+    privileged: true
+    volumes:
+    - './cms.conf:/usr/local/etc/cms.conf:ro'
+    - './contest:/contest'
+    depends_on:
+    - cmsdb
+    - cmslog
+    restart: on-failure
+    environment:
+      CMS_ADMIN_PASS: hunter2
+    networks:
+      cms:
+    ports:
+      - "8888:8888"
+      - "8889:8889"
+  
+networks:
+  cms:
