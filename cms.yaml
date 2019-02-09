@@ -13,17 +13,7 @@
       apt:
         update-cache: yes
         name:
-          - build-essential
-          - openjdk-8-jdk-headless
-          - fp-compiler
-          - postgresql
-          - postgresql-client
-          - python3.6
           - python-docker
-          - cppreference-doc-en-html
-          - cgroup-lite
-          - libcap-dev
-          - zip
 
     - name: prep cms dir
       file:
