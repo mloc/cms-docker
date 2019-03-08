@@ -8,6 +8,23 @@ services:
       POSTGRES_PASSWORD: cms
     networks:
       cms:
+    volumes:
+    - './pg:/var/lib/postgresql/data'
+
+  rankproxy:
+    image: 'quay.io/dtan4/nginx-basic-auth-proxy'
+    ports:
+      - '9000:80'
+    environment:
+      BASIC_AUTH_USERNAME: ranking
+      BASIC_AUTH_PASSWORD: password
+      PROXY_PASS: http://cmsranking:8890
+      PORT: 80
+    depends_on:
+    - cmsranking
+    restart: on-failure
+    networks:
+      cms:
 
   cmslog:
     image: 'mloc6/cms'
@@ -17,18 +34,29 @@ services:
     networks:
       cms:
 
+  cmsranking:
+    image: 'mloc6/cms'
+    entrypoint: cmsRankingWebServer
+    volumes:
+    - './cms.ranking.conf:/usr/local/etc/cms.ranking.conf:ro'
+    - './logo.png:/var/local/lib/cms/ranking/logo.png:ro'
+    networks:
+      cms:
+
   cms:
     image: 'mloc6/cms'
     privileged: true
     volumes:
     - './cms.conf:/usr/local/etc/cms.conf:ro'
     - './contest:/contest'
+    - './users:/cmsusers'
     depends_on:
     - cmsdb
     - cmslog
     restart: on-failure
     environment:
       CMS_ADMIN_PASS: hunter2
+      CMS_TEST_USER: 1
     networks:
       cms:
     ports:
